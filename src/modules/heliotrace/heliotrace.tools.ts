@@ -390,23 +390,80 @@ export class HelioTraceTools {
       matches.map((match) => match.cme.activityID)
     );
 
-    return {
-      source: 'NASA CCMC DONKI',
-      start_date,
-      end_date,
-      counts: {
-        flares: flares.length,
-        cmes: cmes.length,
-        linked_pairs: matches.length
-      },
-      matches,
-      unmatched_flare_ids: flares
-        .filter((flare: any) => !matchedFlareIds.has(flare.flrID))
-        .map((flare: any) => flare.flrID),
-      unmatched_cme_ids: cmes
-        .filter((cme: any) => !matchedCmeIds.has(cme.activityID))
-        .map((cme: any) => cme.activityID)
-    };
+    
+return {
+  source: 'NASA CCMC DONKI',
+  start_date,
+  end_date,
+
+  summary: {
+    flare_records: flares.length,
+    cme_records: cmes.length,
+    confirmed_linked_pairs: matches.length,
+    unmatched_flares: flares.filter(
+      (flare: any) => !matchedFlareIds.has(flare.flrID)
+    ).length,
+    unmatched_cmes: cmes.filter(
+      (cme: any) => !matchedCmeIds.has(cme.activityID)
+    ).length
+  },
+
+  matches: matches.map((match) => ({
+    relationship: {
+      status: 'NASA linkedEvents match',
+      matched_by: match.matched_by
+    },
+
+    flare: {
+      id: match.flare.flrID ?? null,
+      class: match.flare.classType ?? null,
+      begin_time: match.flare.beginTime ?? null,
+      peak_time: match.flare.peakTime ?? null,
+      end_time: match.flare.endTime ?? null,
+      source_location: match.flare.sourceLocation ?? null,
+      active_region: match.flare.activeRegionNum ?? null,
+      nasa_source: match.flare.link ?? null
+    },
+
+    cme: {
+      id: match.cme.activityID ?? null,
+      start_time: match.cme.startTime ?? null,
+      source_location: match.cme.sourceLocation ?? null,
+      active_region: match.cme.activeRegionNum ?? null,
+      nasa_source: match.cme.link ?? null,
+
+      speed_analyses: (match.cme.cmeAnalyses ?? []).map(
+        (analysis: any) => ({
+          speed_km_s: analysis.speed ?? null,
+          analysis_type: analysis.type ?? null,
+          analysis_time: analysis.time21_5 ?? null,
+          estimated_arrival_time:
+            analysis.estimatedArrivalTime ?? null,
+          estimated_shock_arrival_time:
+            analysis.estimatedShockArrivalTime ?? null,
+          earth_impact_flag: analysis.isEarthGB ?? null,
+          nasa_source: analysis.link ?? null
+        })
+      )
+    }
+  })),
+
+  unmatched_flare_ids: flares
+    .filter((flare: any) => !matchedFlareIds.has(flare.flrID))
+    .map((flare: any) => flare.flrID),
+
+  unmatched_cme_ids: cmes
+    .filter((cme: any) => !matchedCmeIds.has(cme.activityID))
+    .map((cme: any) => cme.activityID),
+
+  interpretation_notes: [
+    'Linked pairs reflect relationships recorded by NASA DONKI; they do not independently prove causation.',
+    'Unmatched events have no counterpart matched in the queried records; this does not prove they are unrelated.',
+    'Missing arrival-time or Earth-impact fields mean that this response contains no such value for that analysis.',
+    'CME speeds are measured or analysed speeds, not Earth-arrival speeds.'
+  ]
+};
+
   }
 
 }
