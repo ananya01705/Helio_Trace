@@ -7,10 +7,9 @@ dist/
 src/widgets/.next/
 src/widgets/out/
 
-# Environment files
-.env
-.env.local
-.env.*.local
+# Environment files (keep real secrets local)
+.env*
+!.env.example
 
 # IDE
 .idea/
@@ -55,3 +54,6 @@ uploads/
 *.pem
 *.key
 tokens.json
+
+# Generated local inventory; do not commit absolute machine paths
+file-list.txt
