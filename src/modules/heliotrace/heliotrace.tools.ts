@@ -171,7 +171,7 @@ export class HelioTraceTools {
       - Date.parse(`${start_date}T00:00:00Z`))
       / 86_400_000;
 
-    if (days > 30) {
+    if (days >= 30) {
       throw new Error(
         'Please search a date range of 30 days or less.'
       );
@@ -266,7 +266,7 @@ if (!response.ok) {
       - Date.parse(`${start_date}T00:00:00Z`))
       / 86_400_000;
 
-    if (days > 30) {
+    if (days >= 30) {
       throw new Error(
         'Please search a date range of 30 days or less.'
       );
