@@ -1,4 +1,4 @@
-import { McpClient } from '@nitrostack/core';
+import McpClient from '@nitrostack/core';
 import dotenv from 'dotenv';
 
 dotenv.config();
