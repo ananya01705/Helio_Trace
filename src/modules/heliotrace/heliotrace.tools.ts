@@ -285,10 +285,18 @@ if (!response.ok) {
       url.searchParams.set('startDate', start_date);
       url.searchParams.set('endDate', end_date);
 
-      const response = await fetch(url, {
-        headers: { Accept: 'application/json' },
-        signal: AbortSignal.timeout(10_000)
-      });
+      let response: Response;
+
+      try {
+        response = await fetch(url, {
+          headers: { Accept: 'application/json' },
+          signal: AbortSignal.timeout(10_000)
+        });
+      } catch {
+        throw new Error(
+          `Network request failed while contacting NASA DONKI (${endpoint}). Please check your connection and try again.`
+        );
+      }
 
       if (!response.ok) {
         throw new Error(
@@ -296,7 +304,15 @@ if (!response.ok) {
         );
       }
 
-      const data: unknown = await response.json();
+      let data: unknown;
+
+      try {
+        data = await response.json();
+      } catch {
+        throw new Error(
+          `NASA DONKI returned invalid JSON for ${endpoint}.`
+        );
+      }
 
       if (!Array.isArray(data)) {
         throw new Error(
