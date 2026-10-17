@@ -1,5 +1,5 @@
 {
-  "name": "my-server",
+  "name": "heliotrace",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,8 @@
     "start:prod": "nitrostack-cli start",
     "upgrade": "nitrostack-cli upgrade",
     "install:all": "nitrostack-cli install",
-    "widget": "npm --prefix src/widgets"
+    "widget": "npm --prefix src/widgets",
+    "test": "node --test src/modules/heliotrace/date-utils.test.mjs src/modules/heliotrace/event-correlation.test.mjs"
   },
   "dependencies": {
     "dotenv": "^16.3.1",
