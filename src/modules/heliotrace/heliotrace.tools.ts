@@ -222,9 +222,16 @@ if (!response.ok) {
       );
     }
 
-    const events = data.map((event: unknown) =>
-      summarizeEvent(event, event_type)
-    );
+    // The DONKI endpoint returns an array rather than a separate total-count
+    // field. Therefore, totalRecords means the number of records in the actual
+    // NASA response body, not an estimate of all records that may exist.
+    const totalRecords = data.length;
+    const MAX_EVENTS_RETURNED = 25;
+    const events = data
+      .slice(0, MAX_EVENTS_RETURNED)
+      .map((event: unknown) => summarizeEvent(event, event_type));
+    const recordsReturned = events.length;
+    const truncated = recordsReturned < totalRecords;
 
     return {
       source: 'NASA CCMC DONKI',
@@ -232,7 +239,15 @@ if (!response.ok) {
       event_type,
       start_date,
       end_date,
-      count: events.length,
+      totalRecords,
+      recordsReturned,
+      truncated,
+      nextStep: truncated
+        ? 'Narrow the date range or query a specific event to retrieve a smaller result set.'
+        : null,
+      // Keep count for compatibility with existing clients; it is the number
+      // of event objects actually included in this response.
+      count: recordsReturned,
       events
     };
   }
