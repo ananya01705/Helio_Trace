@@ -1,6 +1,7 @@
 
 import {
   ToolDecorator as Tool,
+  Widget,
   ExecutionContext,
   z
 } from '@nitrostack/core';
@@ -148,6 +149,7 @@ export class HelioTraceTools {
       }
     }
   })
+  @Widget('space-weather-events')
   async searchSpaceWeatherEvents(
     input: any,
     ctx: ExecutionContext
@@ -262,6 +264,7 @@ if (!response.ok) {
       end_date: z.string().describe('End date in YYYY-MM-DD format')
     })
   })
+  @Widget('solar-event-investigation')
   async investigateSolarEvent(input: any, ctx: ExecutionContext) {
     const { start_date, end_date } = input;
 
