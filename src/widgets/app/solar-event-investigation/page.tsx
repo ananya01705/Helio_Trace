@@ -17,8 +17,36 @@ function RecordPanel({ title, record, dark }: { title: string; record: Obj; dark
   </section>;
 }
 export default function SolarEventInvestigation() {
-  const theme = useTheme(); const { getToolOutput } = useWidgetSDK(); const data = getToolOutput<Result>(); const dark = theme === 'dark'; const text = dark ? '#f8fafc' : '#0f172a';
-  if (!data) return <main style={{ ...box(dark), color: text }}>Waiting for flare–CME investigation results…</main>;
+  const theme = useTheme();
+  const { isReady, getToolOutput, getToolInput, getToolResponseMetadata } = useWidgetSDK();
+  const dark = theme === 'dark';
+  const text = dark ? '#f8fafc' : '#0f172a';
+
+  if (!isReady) {
+    return <main style={{ ...box(dark), color: text }}>
+      <h3 style={{ marginTop: 0 }}>Initializing HelioTrace widget…</h3>
+      <p style={{ fontSize: 13 }}>Waiting for NitroStack to connect the widget to its tool response.</p>
+    </main>;
+  }
+
+  const data = getToolOutput<Result>();
+
+  if (!data) {
+    const input = getToolInput<{ start_date?: string; end_date?: string }>();
+    const metadata = getToolResponseMetadata();
+    return <main style={{ ...box(dark), color: text }}>
+      <h3 style={{ marginTop: 0 }}>Investigation output not available</h3>
+      <p style={{ fontSize: 13 }}>The widget SDK is ready, but no tool output was supplied to this widget.</p>
+      <div style={{ fontSize: 12, lineHeight: 1.8 }}>
+        <div><b>SDK ready:</b> Yes</div>
+        <div><b>Tool input received:</b> {input ? 'Yes' : 'No'}</div>
+        {input && <div><b>Date range:</b> {fmt(input.start_date)} → {fmt(input.end_date)}</div>}
+        <div><b>Response metadata received:</b> {metadata ? 'Yes' : 'No'}</div>
+      </div>
+      <p style={{ fontSize: 12, opacity: 0.8 }}>If the tool succeeded in NitroStudio, check that its response is being attached to the <code>solar-event-investigation</code> widget.</p>
+    </main>;
+  }
+
   const s = data.summary || {}; const matches = Array.isArray(data.matches) ? data.matches : [];
   const stats = [['Flare records', s.flare_records ?? 0], ['CME records', s.cme_records ?? 0], ['Linked pairs', s.confirmed_linked_pairs ?? matches.length], ['Unmatched flares', s.unmatched_flares ?? (data.unmatched_flare_ids || []).length], ['Unmatched CMEs', s.unmatched_cmes ?? (data.unmatched_cme_ids || []).length]];
   return <main style={{ color: text, fontFamily: 'system-ui, sans-serif', padding: 2 }}>
