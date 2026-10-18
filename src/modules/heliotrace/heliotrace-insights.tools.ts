@@ -66,7 +66,8 @@ function compactEvent(event: Record<string, unknown>, eventType: string): Record
 export class HelioTraceInsightsTools {
   @Tool({
     name: 'get_space_weather_briefing',
-    description: 'Build a compact multi-source briefing from NASA DONKI solar flare, CME, geomagnetic storm, and solar energetic particle records for a date range.',
+    description: 'Build a compact multi-source briefing from NASA DONKI solar flare, CME, geomagnetic storm, and solar energetic particle records for a date range. Supports optional asynchronous MCP task execution with progress updates and cancellation.',
+    taskSupport: 'optional',
     inputSchema: z.object({
       start_date: z.string().describe('Start date in YYYY-MM-DD format'),
       end_date: z.string().describe('End date in YYYY-MM-DD format')
@@ -76,12 +77,17 @@ export class HelioTraceInsightsTools {
     const { start_date, end_date } = input;
     validateRange(start_date, end_date);
     ctx.logger.info('Building NASA DONKI space-weather briefing', { start_date, end_date });
+    ctx.task?.throwIfCancelled();
+    ctx.task?.updateProgress('Fetching NASA DONKI records for four event categories...');
 
     const types = ['FLR', 'CME', 'GST', 'SEP'] as const;
     const results = await Promise.all(types.map(async (type) => ({
       event_type: type,
       events: await fetchEvents(EVENT_ENDPOINTS[type], start_date, end_date)
     })));
+
+    ctx.task?.throwIfCancelled();
+    ctx.task?.updateProgress('Summarizing event records and preparing the briefing...');
 
     const sections = results.map(({ event_type, events }) => ({
       event_type,
