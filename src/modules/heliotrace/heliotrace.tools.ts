@@ -262,7 +262,63 @@ if (!response.ok) {
     inputSchema: z.object({
       start_date: z.string().describe('Start date in YYYY-MM-DD format'),
       end_date: z.string().describe('End date in YYYY-MM-DD format')
-    })
+    }),
+    examples: {
+      request: {
+        start_date: '2026-10-01',
+        end_date: '2026-10-07'
+      },
+      response: {
+        source: 'NASA CCMC DONKI',
+        start_date: '2026-10-01',
+        end_date: '2026-10-07',
+        summary: {
+          flare_records: 6,
+          cme_records: 21,
+          confirmed_linked_pairs: 1,
+          unmatched_flares: 5,
+          unmatched_cmes: 20
+        },
+        matches: [{
+          relationship: {
+            status: 'NASA linkedEvents match',
+            matched_by: 'linkedEvents'
+          },
+          flare: {
+            id: '2026-10-05T18:48:00-FLR-001',
+            class: 'M1.0',
+            begin_time: '2026-10-05T18:30Z',
+            peak_time: '2026-10-05T18:48Z',
+            end_time: '2026-10-05T19:02Z',
+            source_location: 'Example location',
+            active_region: 12345,
+            nasa_source: 'https://ccmc.gsfc.nasa.gov/DONKI/'
+          },
+          cme: {
+            id: '2026-10-05T19:00:00-CME-001',
+            start_time: '2026-10-05T19:00Z',
+            source_location: 'Example location',
+            active_region: 12345,
+            nasa_source: 'https://ccmc.gsfc.nasa.gov/DONKI/',
+            speed_analyses: [{
+              speed_km_s: 650,
+              analysis_type: 'Example',
+              analysis_time: '2026-10-05T20:00Z',
+              estimated_arrival_time: null,
+              estimated_shock_arrival_time: null,
+              earth_impact_flag: null,
+              nasa_source: 'https://ccmc.gsfc.nasa.gov/DONKI/'
+            }]
+          }
+        }],
+        unmatched_flare_ids: ['example-flare-id'],
+        unmatched_cme_ids: ['example-cme-id'],
+        interpretation_notes: [
+          'Linked pairs reflect relationships recorded by NASA DONKI; they do not independently prove causation.',
+          'Unmatched events have no counterpart matched in the queried records.'
+        ]
+      }
+    }
   })
   @Widget('solar-event-investigation')
   async investigateSolarEvent(input: any, ctx: ExecutionContext) {
