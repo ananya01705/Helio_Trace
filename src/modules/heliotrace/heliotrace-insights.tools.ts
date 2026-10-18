@@ -83,12 +83,21 @@ export class HelioTraceInsightsTools {
       events: await fetchEvents(EVENT_ENDPOINTS[type], start_date, end_date)
     })));
 
-    const sections = results.map(({ event_type, events }) => ({
-      event_type,
-      count: events.length,
-      events: events.slice(0, 8).map((event) => compactEvent(event, event_type)),
-      truncated: events.length > 8
-    }));
+    const MAX_EVENTS_PER_SECTION = 8;
+    const sections = results.map(({ event_type, events }) => {
+      const returnedEvents = events.slice(0, MAX_EVENTS_PER_SECTION);
+      return {
+        event_type,
+        totalRecords: events.length,
+        recordsReturned: returnedEvents.length,
+        count: returnedEvents.length,
+        events: returnedEvents.map((event) => compactEvent(event, event_type)),
+        truncated: returnedEvents.length < events.length,
+        nextStep: returnedEvents.length < events.length
+          ? 'Narrow the date range or use search_space_weather_events for a focused query.'
+          : null
+      };
+    });
 
     return {
       source: 'NASA CCMC DONKI',
@@ -96,13 +105,17 @@ export class HelioTraceInsightsTools {
       start_date,
       end_date,
       summary: {
-        total_records_returned: sections.reduce((total, section) => total + section.count, 0),
-        counts_by_type: Object.fromEntries(sections.map((section) => [section.event_type, section.count]))
+        total_records_reported_by_responses: sections.reduce((total, section) => total + section.totalRecords, 0),
+        records_returned: sections.reduce((total, section) => total + section.recordsReturned, 0),
+        truncated: sections.some((section) => section.truncated),
+        counts_by_type: Object.fromEntries(sections.map((section) => [section.event_type, section.totalRecords]))
       },
       sections,
       interpretation_notes: [
         'Counts describe records returned by NASA DONKI for this date range; they are not a severity score.',
-        'Only the first eight records per event type are included in each section; use search_space_weather_events for a focused query.',
+        'totalRecords is the count of objects actually present in the NASA API response body; it is not a separate NASA-reported total or an estimate of records omitted upstream.',
+        'Only the first eight records per event type are included in each section; truncated and nextStep indicate when records from the response body were omitted.',
+        'The API response alone may not establish whether NASA omitted records upstream; truncated describes this tool response only.',
         'A missing field means the source did not provide that value in the returned record; it does not imply a negative finding.',
         'This briefing is informational and is not an operational warning or forecast.'
       ]
