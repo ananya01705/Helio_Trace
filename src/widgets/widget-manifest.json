@@ -2,47 +2,233 @@
   "version": "1.0.0",
   "widgets": [
     {
-      "uri": "/calculator-result",
-      "name": "Calculator Result",
-      "description": "Displays the result of a calculation with operation details",
+      "uri": "/space-weather-events",
+      "name": "HelioTrace Event Search",
+      "description": "Readable NASA DONKI event search results, record counts, source links, and truncation status.",
       "examples": [
         {
-          "name": "Addition Example",
-          "description": "Shows the result of adding 5 + 3",
+          "name": "Solar flare search",
+          "description": "A search response for solar flare records.",
           "data": {
-            "operation": "add",
-            "a": 5,
-            "b": 3,
-            "result": 8,
-            "expression": "5 + 3 = 8"
-          }
-        },
-        {
-          "name": "Multiplication Example",
-          "description": "Shows the result of multiplying 6 × 7",
-          "data": {
-            "operation": "multiply",
-            "a": 6,
-            "b": 7,
-            "result": 42,
-            "expression": "6 × 7 = 42"
-          }
-        },
-        {
-          "name": "Division Example",
-          "description": "Shows the result of dividing 20 ÷ 4",
-          "data": {
-            "operation": "divide",
-            "a": 20,
-            "b": 4,
-            "result": 5,
-            "expression": "20 ÷ 4 = 5"
+            "source": "NASA CCMC DONKI",
+            "event_type": "FLR",
+            "start_date": "2026-10-01",
+            "end_date": "2026-10-07",
+            "totalRecords": 6,
+            "recordsReturned": 6,
+            "count": 6,
+            "truncated": false,
+            "source_url": "https://ccmc.gsfc.nasa.gov/DONKI-API/get/FLR?startDate=2026-10-01&endDate=2026-10-07",
+            "events": [
+              {
+                "event_type": "FLR",
+                "flrID": "example-flare-id",
+                "classType": "M1.0",
+                "peakTime": "2026-10-05T18:48Z",
+                "sourceLocation": "S12E34",
+                "link": "https://ccmc.gsfc.nasa.gov/DONKI/"
+              }
+            ]
           }
         }
       ],
-      "tags": ["calculator", "math", "result"]
+      "tags": [
+        "heliotrace",
+        "NASA",
+        "DONKI",
+        "space-weather",
+        "events"
+      ]
+    },
+    {
+      "uri": "/solar-event-investigation",
+      "name": "HelioTrace Solar Event Investigation",
+      "description": "Visualizes flare-CME matched pairs, unmatched IDs, analysis values, and interpretation notes.",
+      "examples": [
+        {
+          "name": "Flare-CME correlation",
+          "description": "An investigation response with a recorded linked pair.",
+          "data": {
+            "source": "NASA CCMC DONKI",
+            "start_date": "2026-10-01",
+            "end_date": "2026-10-07",
+            "summary": {
+              "flare_records": 2,
+              "cme_records": 1,
+              "confirmed_linked_pairs": 1,
+              "unmatched_flares": 1,
+              "unmatched_cmes": 0
+            },
+            "matches": [
+              {
+                "relationship": {
+                  "status": "NASA linkedEvents match",
+                  "matched_by": "linkedEvents"
+                },
+                "flare": {
+                  "id": "example-flare-id",
+                  "class": "M1.0",
+                  "peak_time": "2026-10-05T18:48Z",
+                  "source_location": "S12E34",
+                  "nasa_source": "https://ccmc.gsfc.nasa.gov/DONKI/"
+                },
+                "cme": {
+                  "id": "example-cme-id",
+                  "start_time": "2026-10-05T19:00Z",
+                  "source_location": "S12E34",
+                  "nasa_source": "https://ccmc.gsfc.nasa.gov/DONKI/",
+                  "speed_analyses": [
+                    {
+                      "speed_km_s": 500,
+                      "earth_impact_flag": null,
+                      "estimated_arrival_time": null
+                    }
+                  ]
+                }
+              }
+            ],
+            "unmatched_flare_ids": [
+              "example-unmatched-flare"
+            ],
+            "unmatched_cme_ids": [],
+            "interpretation_notes": [
+              "A recorded link does not independently prove causation."
+            ]
+          }
+        }
+      ],
+      "tags": [
+        "heliotrace",
+        "NASA",
+        "DONKI",
+        "solar-flare",
+        "CME",
+        "correlation"
+      ]
+    },
+    {
+      "uri": "/space-weather-briefing",
+      "name": "HelioTrace Space Weather Briefing",
+      "description": "Category-level briefing cards for FLR, CME, GST, and SEP records with sample source links.",
+      "examples": [
+        {
+          "name": "Multi-category briefing",
+          "description": "A compact multi-category NASA DONKI briefing.",
+          "data": {
+            "source": "NASA CCMC DONKI",
+            "source_url": "https://ccmc.gsfc.nasa.gov/DONKI/",
+            "start_date": "2026-10-01",
+            "end_date": "2026-10-07",
+            "summary": {
+              "total_records_reported_by_responses": 9,
+              "records_returned": 9,
+              "truncated": false,
+              "counts_by_type": {
+                "FLR": 6,
+                "CME": 2,
+                "GST": 1,
+                "SEP": 0
+              }
+            },
+            "sections": [
+              {
+                "event_type": "FLR",
+                "totalRecords": 6,
+                "recordsReturned": 6,
+                "count": 6,
+                "truncated": false,
+                "events": [
+                  {
+                    "event_type": "FLR",
+                    "flrID": "example-flare-id",
+                    "classType": "M1.0",
+                    "peakTime": "2026-10-05T18:48Z",
+                    "link": "https://ccmc.gsfc.nasa.gov/DONKI/"
+                  }
+                ]
+              },
+              {
+                "event_type": "CME",
+                "totalRecords": 2,
+                "recordsReturned": 2,
+                "count": 2,
+                "truncated": false,
+                "events": []
+              },
+              {
+                "event_type": "GST",
+                "totalRecords": 1,
+                "recordsReturned": 1,
+                "count": 1,
+                "truncated": false,
+                "events": []
+              },
+              {
+                "event_type": "SEP",
+                "totalRecords": 0,
+                "recordsReturned": 0,
+                "count": 0,
+                "truncated": false,
+                "events": []
+              }
+            ],
+            "interpretation_notes": [
+              "Counts are not a severity score.",
+              "This briefing is informational and is not an operational warning or forecast."
+            ]
+          }
+        }
+      ],
+      "tags": [
+        "heliotrace",
+        "NASA",
+        "DONKI",
+        "briefing",
+        "space-weather"
+      ]
+    },
+    {
+      "uri": "/space-weather-period-comparison",
+      "name": "HelioTrace Period Comparison",
+      "description": "Side-by-side period summaries with count difference, percentage change, sample records, and caveats.",
+      "examples": [
+        {
+          "name": "CME period comparison",
+          "description": "Compare CME record counts across two periods.",
+          "data": {
+            "source": "NASA CCMC DONKI",
+            "event_type": "CME",
+            "first_period": {
+              "start_date": "2026-09-01",
+              "end_date": "2026-09-07",
+              "count": 4,
+              "sample_events": []
+            },
+            "second_period": {
+              "start_date": "2026-10-01",
+              "end_date": "2026-10-07",
+              "count": 6,
+              "sample_events": []
+            },
+            "comparison": {
+              "count_difference_second_minus_first": 2,
+              "direction": "more_records_in_second_period",
+              "percentage_change": 50
+            },
+            "interpretation_notes": [
+              "This compares record counts, not physical severity, risk, or impact."
+            ]
+          }
+        }
+      ],
+      "tags": [
+        "heliotrace",
+        "NASA",
+        "DONKI",
+        "comparison",
+        "space-weather"
+      ]
     }
   ],
-  "generatedAt": "2025-01-01T00:00:00.000Z"
+  "generatedAt": "2026-10-18T13:26:36.443Z"
 }
-
