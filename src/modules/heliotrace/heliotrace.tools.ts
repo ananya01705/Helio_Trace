@@ -255,7 +255,8 @@ if (!response.ok) {
   @Tool({
     name: 'investigate_solar_event',
     description:
-      'Investigate links between NASA DONKI solar flares and CMEs for a date range.',
+      'Investigate links between NASA DONKI solar flares and CMEs for a date range. Supports optional asynchronous MCP task execution with progress updates and cancellation.',
+    taskSupport: 'optional',
     inputSchema: z.object({
       start_date: z.string().describe('Start date in YYYY-MM-DD format'),
       end_date: z.string().describe('End date in YYYY-MM-DD format')
@@ -291,6 +292,8 @@ if (!response.ok) {
       start_date,
       end_date
     });
+    ctx.task?.throwIfCancelled();
+    ctx.task?.updateProgress('Fetching NASA DONKI flare and CME records...');
 
     async function fetchEvents(endpoint: string): Promise<unknown[]> {
       const url = new URL(
@@ -343,6 +346,9 @@ if (!response.ok) {
       fetchEvents('CME')
     ]);
 
+    ctx.task?.throwIfCancelled();
+    ctx.task?.updateProgress('Correlating NASA-recorded flare and CME links...');
+
     const flares = flareData.map(
       (event: unknown) => summarizeEvent(event, 'FLR')
     );
@@ -350,6 +356,9 @@ if (!response.ok) {
     const cmes = cmeData.map(
       (event: unknown) => summarizeEvent(event, 'CME')
     );
+
+    ctx.task?.throwIfCancelled();
+    ctx.task?.updateProgress('Preparing the source-linked investigation report...');
 
     const {
       matches,
