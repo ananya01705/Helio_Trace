@@ -1,104 +1,108 @@
-# HelioTrace
+# ☀️ HelioTrace
 
-**HelioTrace** is a NitroStack MCP server for exploring and correlating solar and space-weather events using data from NASA's DONKI (Database Of Notifications, Knowledge, Information).
+**NASA-powered space-weather investigation through MCP.**
 
-The project is being built for the NitroStack **Fly to the Moon** hackathon. It focuses on helping a user query event records and inspect flare–coronal mass ejection (CME) relationships recorded by NASA.
+HelioTrace is a TypeScript MCP server built for the NitroStack **Fly to the Moon** hackathon. It queries NASA's [DONKI (Database Of Notifications, Knowledge, Information)](https://ccmc.gsfc.nasa.gov/DONKI/) records and helps investigate solar flares, coronal mass ejections (CMEs), and other space-weather event categories.
 
-> **Project status:** The MCP tools and event-correlation logic are implemented in the repository. The included widget is still the original calculator demo; a dedicated space-weather dashboard is not yet implemented. This README describes the current code rather than planned features.
+> **Important:** HelioTrace is an exploratory research tool, not an official NASA product, a forecasting system, or an operational warning service. It reports source records and recorded associations; it does not establish causation or predict impacts.
 
-## What it does
+## ✨ What you can do
 
 ### MCP tools
 
-- **`search_space_weather_events`** — queries NASA DONKI for a selected event type and date range. Supported types: CME, FLR (solar flare), GST, IPS, SEP, MPC, RBE, HSS and WSA.
-- **`investigate_solar_event`** — fetches solar flare and CME records for a date range and finds pairs linked through NASA DONKI's `linkedEvents` records. It returns a summary, matched records, unmatched event IDs and interpretation notes.
+| Tool | Purpose |
+|---|---|
+| `search_space_weather_events` | Search one DONKI event category over a date range. |
+| `investigate_solar_event` | Examine NASA-recorded links between solar flare (FLR) and CME records, including matched and unmatched records. |
+| `get_space_weather_briefing` | Build a compact multi-category briefing for FLR, CME, GST and SEP records. |
+| `compare_space_weather_periods` | Compare the number of records for the same event category across two date ranges. |
 
-### Correlation approach
+The search tool supports the event types implemented in the server schema: CME, FLR, GST, IPS, SEP, MPC, RBE, HSS and WSA. For exact inputs and constraints, use the schemas advertised by the running MCP server.
 
-HelioTrace uses NASA's recorded event links rather than claiming that two events are related merely because they occurred near each other in time. The output distinguishes recorded links from interpretation:
+### Resources
 
-- A matched pair means NASA DONKI records a link between the events.
-- An unmatched event has no counterpart matched in the queried records; that does **not** prove the events are unrelated.
-- CME speed and estimated-arrival fields are reported only when present in the source data. A missing field is not treated as a negative result.
+| Resource URI | Contents |
+|---|---|
+| `heliotrace://guide` | Overview of HelioTrace and its tools. |
+| `heliotrace://event-types` | JSON reference for supported event types. |
+| `heliotrace://methodology` | Methodology, interpretation guidance and data limitations. |
 
-### Other project components
+### Reusable prompts
 
-- TypeScript and Zod-based MCP tool input schemas
-- Date validation and a maximum 30-day query window
-- Request timeout and error handling for the event-search tool
-- Unit tests for date validation and flare–CME correlation
-- NitroStack system health-check class
-- Starter calculator module and calculator widget retained from the original template
+| Prompt | Required arguments | Use |
+|---|---|---|
+| `investigate_solar_event` | `start_date`, `end_date` | Investigate flare–CME links over a period. |
+| `space_weather_briefing` | `start_date`, `end_date` | Summarize FLR, CME, GST and SEP records. |
+| `compare_solar_activity_periods` | `event_type`, `first_start_date`, `first_end_date`, `second_start_date`, `second_end_date` | Compare the same category across two periods. |
 
-## Tech stack
+Prompts provide instructions to the AI client; they are not themselves a guarantee that a tool was executed. When testing, check the chat's operation flow/logs to confirm that the expected tool was called and that the final answer reflects its returned data.
 
-- [NitroStack](https://docs.nitrostack.ai) — MCP server framework
-- TypeScript, Node.js and Zod
-- NASA CCMC DONKI API — space-weather event records
-- Node.js built-in test runner — focused tests
+## 🔬 Interpretation principles
 
-## Requirements
+- **Recorded links are not proof of causation.** A flare–CME pair is treated as linked when NASA DONKI records a corresponding link.
+- **Unmatched does not mean unrelated.** It means no counterpart was matched in the records queried.
+- **Missing data is not a negative result.** If arrival, speed, or Earth-impact fields are absent, report them as unavailable rather than implying no impact.
+- **Counts are not severity.** A higher number of records does not automatically mean stronger activity, greater risk, or greater impact.
+- **Do not invent predictions.** Cite source records and distinguish observations from interpretation.
 
-- Node.js (the project has been developed with Node.js 24)
+## 🚀 Run locally (Windows PowerShell)
+
+### Requirements
+
+- Node.js 24 (the version used during development)
 - npm
 - Git (optional, for cloning)
 
-## Setup
-
-### 1. Get the code
-
-Clone the repository and enter the project folder:
+### 1. Get the repository
 
 ```powershell
 git clone https://github.com/ananya01705/Helio_Trace.git
 cd Helio_Trace
 ```
 
-If you already have the repository on your computer, open that folder in VS Code and use its terminal.
+If you already have the repository, open its folder in VS Code and use **Terminal → New Terminal** with PowerShell.
 
-### 2. Install dependencies
+### 2. Install packages
 
 ```powershell
 npm install
 ```
 
-### 3. Configure environment variables (optional)
-
-Copy the example environment file to a local `.env` file:
+### 3. Optional environment configuration
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-The checked-in `.env.example` contains NitroStack logging and protocol examples. Keep real credentials and local secrets in `.env`; do not commit that file.
+Review `.env.example` for available configuration. Keep credentials and local secrets in `.env`; never commit real credentials.
 
-### 4. Start the NitroStack development server
+### 4. Start the development server
 
 ```powershell
 npm run dev
 ```
 
-Keep the terminal open while you work. The NitroStack CLI controls the server's development transport; use the transport and connection details printed by the CLI when connecting a compatible MCP client or NitroStudio.
+Keep this terminal open while using the server. In NitroStudio, connect the local project and confirm that the expected tools, resources and prompts are discovered.
 
-### 5. Build
+### 5. Build and run helper tests
 
 ```powershell
 npm run build
-```
-
-### 6. Run the focused tests
-
-With Node.js 24, run:
-
-```powershell
 node --test src/modules/heliotrace/date-utils.test.mjs src/modules/heliotrace/event-correlation.test.mjs
 ```
 
-These tests cover date validation and the correlation helper. They do not test live NASA API availability or a complete end-to-end MCP client session.
+The focused tests cover date validation and the flare–CME correlation helper. They do **not** replace live tool checks or end-to-end MCP tests. Run these commands locally after pulling changes and resolve any failures before treating the build as verified.
 
-## Example tool inputs
+## 🧪 Try it in NitroStudio
 
-Search for solar flares over a short date range:
+Use short date windows first. For example, choose the `investigate_solar_event` prompt and enter:
+
+- `start_date`: `2026-10-01`
+- `end_date`: `2026-10-07`
+
+Then inspect the operation flow/logs. A successful prompt test should show a call to `investigate_solar_event` and a result from the tool before the assistant summarizes the evidence. If no tool call appears, try invoking the tool directly from **Tools** with the same dates to separate a prompt/client issue from a data-fetching issue.
+
+Example direct input for `search_space_weather_events`:
 
 ```json
 {
@@ -108,35 +112,38 @@ Search for solar flares over a short date range:
 }
 ```
 
-Investigate recorded flare–CME links over the same range:
+Dates must use `YYYY-MM-DD`, be valid calendar dates, and follow the server's date-range limit. The current implementation is intended for short windows (under 30 days); confirm the exact boundary in the active tool schema/error message.
 
-```json
-{
-  "start_date": "2026-10-01",
-  "end_date": "2026-10-07"
-}
-```
+## 🧱 Technology
 
-Dates must use `YYYY-MM-DD`, be valid calendar dates, and span no more than 30 days.
+- **Runtime:** Node.js, TypeScript
+- **MCP framework:** [NitroStack](https://docs.nitrostack.ai)
+- **Input validation:** Zod
+- **Data source:** [NASA CCMC DONKI](https://ccmc.gsfc.nasa.gov/DONKI/)
+- **Tests:** Node.js built-in test runner
 
-## Repository layout
+## 📁 Project structure
 
 ```text
 src/
+  index.ts
   app.module.ts
   health/
     system.health.ts
   modules/
-    calculator/       # starter-template module
+    calculator/                   # starter-template module retained
     heliotrace/
       heliotrace.module.ts
-      heliotrace.tools.ts
-      event-correlation.ts
-      event-correlation.test.mjs
+      heliotrace.tools.ts         # search + flare/CME investigation
+      heliotrace-insights.tools.ts # briefing + period comparison
+      heliotrace.resources.ts     # guide, event types, methodology
+      heliotrace.prompts.ts       # reusable prompt templates
       date-utils.ts
       date-utils.test.mjs
+      event-correlation.ts
+      event-correlation.test.mjs
   widgets/
-    app/calculator-result/  # starter calculator widget
+    app/calculator-result/         # original starter widget
 scripts/
   client-demo.ts
 .env.example
@@ -144,24 +151,20 @@ package.json
 README.md
 ```
 
-## Current limitations / next steps
+## ⚠️ Known limitations
 
-- Replace or supplement the starter calculator widget with a dedicated space-weather interface.
-- Add end-to-end tests that exercise MCP tool calls and mock NASA DONKI responses.
-- Consider consolidating shared request/error-handling logic used by the two tools.
-- Review generated repository files and remove large, unnecessary artifacts before submission.
-- Verify the tools against the current DONKI API and document a tested client connection flow before presenting a live demo.
+- The widget is still the original calculator demo; a dedicated HelioTrace dashboard has not yet been implemented.
+- Current automated tests cover helper functions, not all tool/resource/prompt handlers.
+- Live NASA DONKI availability and response formats can affect results.
+- Prompt behavior depends partly on the MCP client/model. Verify actual tool calls and results in NitroStudio rather than assuming that selecting a prompt ran the intended tool.
+- Task-enabled execution and cancellation behavior should be tested in the target NitroStack runtime before relying on it for long-running operations.
 
-## Data source
+## 📚 References
 
 - [NASA CCMC DONKI](https://ccmc.gsfc.nasa.gov/DONKI/)
-- [NASA DONKI API documentation](https://ccmc.gsfc.nasa.gov/DONKI/)
+- [NitroStack documentation](https://docs.nitrostack.ai)
+- [NitroStack Studio](https://nitrostack.ai/studio)
 
-HelioTrace is an exploratory information tool, not an official NASA product or an operational space-weather warning service. Always consult the source records and relevant official agencies for authoritative information.
-
-## Hackathon
+---
 
 Built for the NitroStack **Fly to the Moon** hackathon.
-
-- NitroStack docs: https://docs.nitrostack.ai
-- NitroStack Studio: https://nitrostack.ai/studio
