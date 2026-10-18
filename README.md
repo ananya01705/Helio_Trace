@@ -50,6 +50,7 @@ HelioTrace is one such server. Learn more about MCP app development and deployme
 - **Period comparison:** Compare record counts and sample events for the same category across two date ranges.
 - **MCP tools, resources, and prompts:** Expose structured operations and reusable reference material to compatible clients.
 - **Source-aware responses:** Include NASA DONKI source links where available and notes about interpretation and missing fields.
+- **Four result widgets:** Dedicated views for event search, flare–CME investigation, multi-category briefing, and period comparison.
 - **Hosted endpoint:** A deployed MCP endpoint is available for compatible clients.
 
 ## MCP Tools
@@ -84,6 +85,19 @@ Date inputs use `YYYY-MM-DD`. The current implementation limits each queried dat
 | `compare_solar_activity_periods` | `event_type`, `first_start_date`, `first_end_date`, `second_start_date`, `second_end_date` | Guide a comparison of the same event category across two periods. |
 
 Prompts provide instructions to the MCP client; selecting a prompt does not by itself guarantee that a tool has been executed. Check the client’s operation flow or logs to verify which tools ran and what results they returned.
+
+## Result Widgets
+
+Each HelioTrace tool is connected to a dedicated result widget:
+
+| Widget | Connected tool | What it displays |
+|---|---|---|
+| `space-weather-events` | `search_space_weather_events` | Event counts, date range, NASA source links, record cards, and truncation status. |
+| `solar-event-investigation` | `investigate_solar_event` | Flare–CME matched pairs, unmatched IDs, CME analysis fields, and interpretation notes. |
+| `space-weather-briefing` | `get_space_weather_briefing` | FLR, CME, GST, and SEP category summaries with sample records. |
+| `space-weather-period-comparison` | `compare_space_weather_periods` | Side-by-side date ranges, count differences, percentage change, and sample records. |
+
+The widgets present the tool output returned by the server; they do not make additional NASA requests or create forecasts. They include light/dark theme support and source links where those links are present in the response.
 
 ## Live Demo
 
@@ -236,9 +250,9 @@ A source record may not include every field. HelioTrace treats absent values as 
 
 No. A match means the relationship is recorded in NASA DONKI according to the project's correlation logic. It does not independently establish causation.
 
-### Why might the client show JSON instead of a custom dashboard?
+### Why might a client still show JSON instead of a widget?
 
-The current project does not include a dedicated HelioTrace dashboard widget. Clients can still invoke the MCP tools and inspect their structured JSON responses. A custom widget would be a separate enhancement.
+The server and client must both support the NitroStack widget integration, and the widget bundle must be built and deployed. If a client displays JSON, first verify that the latest deployment is live, then confirm that the client supports the widget protocol and that the tool result is associated with the expected widget.
 
 ## Technology
 
@@ -258,7 +272,7 @@ The current project does not include a dedicated HelioTrace dashboard widget. Cl
 - **Response limits matter.** Some tools cap the number of records included. Check fields such as `truncated`, `recordsReturned`, and `nextStep` when present.
 - **Live data can change.** NASA DONKI availability, data updates, and response formats can affect results.
 - **Tests are focused, not exhaustive.** Current automated tests cover helper functions, not every tool, resource, prompt, transport, or task-execution path.
-- **Widget status:** The existing widget is the starter calculator demo; a dedicated HelioTrace visualization has not yet been implemented.
+- **Widget deployment:** Four HelioTrace result widgets are now registered in the repository. Their availability in the hosted app depends on a successful widget build and deployment; verify them in NitroStack Studio after deployment.
 
 ## Project Structure
 
@@ -281,7 +295,11 @@ src/
       event-correlation.ts
       event-correlation.test.mjs
   widgets/
-    app/calculator-result/          # original starter widget
+    app/space-weather-events/             # search results widget
+    app/solar-event-investigation/         # flare–CME investigation widget
+    app/space-weather-briefing/            # multi-category briefing widget
+    app/space-weather-period-comparison/  # period comparison widget
+    app/calculator-result/                 # original starter widget
 scripts/
   client-demo.ts
 .env.example
