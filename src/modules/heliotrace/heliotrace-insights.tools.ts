@@ -1,4 +1,4 @@
-import { ToolDecorator as Tool, ExecutionContext, z } from '@nitrostack/core';
+import { ToolDecorator as Tool, Widget, ExecutionContext, z } from '@nitrostack/core';
 import { isValidDate } from './date-utils.js';
 
 const EVENT_ENDPOINTS: Record<string, string> = {
@@ -73,6 +73,7 @@ export class HelioTraceInsightsTools {
       end_date: z.string().describe('End date in YYYY-MM-DD format')
     })
   })
+  @Widget('space-weather-briefing')
   async getSpaceWeatherBriefing(input: { start_date: string; end_date: string }, ctx: ExecutionContext) {
     const { start_date, end_date } = input;
     validateRange(start_date, end_date);
@@ -139,6 +140,7 @@ export class HelioTraceInsightsTools {
       second_end_date: z.string().describe('Second period end date in YYYY-MM-DD format')
     })
   })
+  @Widget('space-weather-period-comparison')
   async compareSpaceWeatherPeriods(input: {
     event_type: EventType;
     first_start_date: string;
