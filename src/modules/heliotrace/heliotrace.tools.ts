@@ -4,8 +4,8 @@ import {
   ExecutionContext,
   z
 } from '@nitrostack/core';
-import { isValidDate } from './date-utils';
-import { correlateSolarEvents } from './event-correlation';
+import { isValidDate } from './date-utils.js';
+import { correlateSolarEvents } from './event-correlation.js';
 
 const EVENT_ENDPOINTS: Record<string, string> = {
   CME: 'CME',
