@@ -4,7 +4,7 @@
 ![Built with NitroStack](https://img.shields.io/badge/Built%20with-NitroStack-0A66FF)
 ![Deployment](https://img.shields.io/badge/deployment-live-brightgreen)
 
-**HelioTrace** is a Model Context Protocol (MCP) server for investigating and comparing space-weather events using structured records from NASA's [DONKI (Database Of Notifications, Knowledge, Information)](https://ccmc.gsfc.nasa.gov/DONKI/). Built with [NitroStack](https://nitrostack.ai), it makes selected NASA DONKI data and event-correlation workflows available to compatible AI assistants and MCP clients.
+**HelioTrace** is a Model Context Protocol (MCP) server for exploring, correlating, briefing, and comparing space-weather event records from NASA's [DONKI (Database Of Notifications, Knowledge, Information)](https://ccmc.gsfc.nasa.gov/DONKI/). Built with [NitroStack](https://nitrostack.ai), it exposes four focused tools, three resources, three reusable prompts, and four result widgets to compatible AI assistants and MCP clients.
 
 > **Scope note:** HelioTrace is an exploratory research and information tool. It is not an official NASA product, an operational warning service, or a forecasting system. Recorded associations are not proof of causation, and record counts are not severity scores.
 
@@ -36,9 +36,71 @@ The server uses a modular TypeScript architecture built on NitroStack. Tools pro
 
 Future extensions could add further datasets, richer visualizations, or additional analysis workflows. The current implementation is grounded in NASA DONKI records and should be understood within the limitations described below.
 
+## Problem Statement
+
+Space-weather observations are published as separate event records across categories and time windows. Investigators may need to search multiple event types, follow recorded links between solar flares and coronal mass ejections (CMEs), and compare activity across periods. Doing this manually can make it harder to assemble a consistent, source-linked view of the available records.
+
+HelioTrace addresses this information-discovery problem. It does **not** claim that event associations prove causation, that event counts measure severity, or that the system can forecast solar storms.
+
+## Solution
+
+HelioTrace provides a single MCP server for structured exploration of NASA DONKI space-weather records. Through four tools, compatible MCP clients can:
+
+- Search supported event categories over a selected date range.
+- Investigate recorded solar-flare–CME relationships, including matched and unmatched records.
+- Assemble a compact briefing across solar flares (FLR), CMEs, geomagnetic storms (GST), and solar energetic particle (SEP) records.
+- Compare records from the same event category across two date ranges.
+
+Responses preserve available source links and interpretation notes. Dedicated NitroStack result widgets display the returned data in focused views. The implementation is a research and information workflow—not an operational alerting, causal-inference, or forecasting system.
+
+## Multi-Stage Investigation Workflow
+
+The current implementation uses tool-driven stages that can be orchestrated by an MCP-compatible AI client. The roles below are a **logical workflow diagram**, not a claim that four independent autonomous agents are already running in the deployed application.
+
+```mermaid
+flowchart TD
+    U[User question] --> C[MCP client / coordinator]
+    C --> T{Choose HelioTrace tool}
+    T --> S[Event Search]
+    T --> F[Flare-CME Investigation]
+    T --> B[Space-Weather Briefing]
+    T --> P[Period Comparison]
+    S --> D[NASA DONKI records]
+    F --> D
+    B --> D
+    P --> D
+    D --> V[Validate dates and normalize available fields]
+    V --> R[Correlate recorded links or summarize counts]
+    R --> O[Structured results with source links and caveats]
+    O --> W[Matching result widget or MCP client output]
+```
+
+### Agent-ready role separation
+
+| Logical role | Responsibility | Current implementation |
+|---|---|---|
+| Coordinator | Interprets the user’s request and chooses a workflow | Handled by the MCP client; no separate autonomous coordinator agent is claimed |
+| Data retrieval | Requests records for selected event types and dates | Implemented through the NASA DONKI-backed MCP tools |
+| Correlation and comparison | Examines recorded flare–CME links or compares event counts between periods | Implemented in the investigation and period-comparison workflows |
+| Briefing and presentation | Organizes returned records and caveats for review | Implemented through the briefing tool and result widgets |
+
+This separation makes HelioTrace suitable for future multi-agent orchestration, where an external coordinator could call retrieval, correlation, and reporting steps in sequence. Such autonomous multi-agent orchestration is a potential extension, not a current feature claim.
+
 ## What is MCP?
 
 The **Model Context Protocol (MCP)** is an open protocol that allows compatible AI applications to discover and use external tools and context sources through a standard interface. An MCP server can expose tools, resources, and prompts so a client can integrate those capabilities into an AI-assisted workflow.
+
+### HelioTrace MCP capabilities
+
+| MCP capability | How HelioTrace uses it |
+|---|---|
+| **Tools** | Four callable operations for event search, flare–CME investigation, multi-category briefing, and period comparison. |
+| **Resources** | Three reference resources: `heliotrace://guide`, `heliotrace://event-types`, and `heliotrace://methodology`. |
+| **Prompts** | Three reusable investigation prompts for flare–CME investigation, space-weather briefing, and period comparison. |
+| **Structured results** | Tool responses provide event records, counts, date ranges, available source links, and interpretation metadata as applicable. |
+| **NitroStack result widgets** | Four dedicated result views present the corresponding tool output. Widget display depends on a compatible client and a successful deployment. |
+| **Remote access** | The deployed server exposes a Streamable HTTP MCP endpoint at `/mcp`. |
+
 
 HelioTrace is one such server. Learn more about MCP app development and deployment at [NitroStack](https://nitrostack.ai).
 
